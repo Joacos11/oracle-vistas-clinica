@@ -1,0 +1,164 @@
+-- =========================================
+-- TABLAS MAESTRAS
+-- =========================================
+CREATE TABLE TMEDICO (
+    CODM VARCHAR2(5) PRIMARY KEY,
+    TIPODOCM VARCHAR2(10),
+    NRODOCM VARCHAR2(15),
+    PATERM VARCHAR2(30),
+    MATERNM VARCHAR2(30),
+    NOMBRESM VARCHAR2(50),
+    CELUM VARCHAR2(15)
+);
+
+CREATE TABLE TPACIENTE (
+    CODP VARCHAR2(5) PRIMARY KEY,
+    PATERP VARCHAR2(30),
+    MATERNP VARCHAR2(30),
+    NOMBRESP VARCHAR2(50)
+);
+
+CREATE TABLE TESPECIALIDAD (
+    CODE VARCHAR2(5) PRIMARY KEY,
+    NOMBESP VARCHAR2(50)
+);
+
+CREATE TABLE TENFERMEDAD (
+    CODE VARCHAR2(5) PRIMARY KEY,
+    NOMBE VARCHAR2(50),
+    DESCE VARCHAR2(100)
+);
+
+-- =========================================
+-- TABLAS RELACIONALES
+-- =========================================
+CREATE TABLE TDIAGNOSTICO (
+    CODDIAG VARCHAR2(5) PRIMARY KEY,
+    FECHADIAG DATE,
+    DESCDIAG VARCHAR2(100),
+    CODP VARCHAR2(5),
+    CODM VARCHAR2(5),
+    FOREIGN KEY (CODP) REFERENCES TPACIENTE(CODP),
+    FOREIGN KEY (CODM) REFERENCES TMEDICO(CODM)
+);
+
+CREATE TABLE TESPECIALIDADDELMEDICO (
+    CODEM VARCHAR2(5) PRIMARY KEY,
+    CODESP VARCHAR2(5),
+    CODM VARCHAR2(5),
+    FECHA_ASIG DATE,
+    FOREIGN KEY (CODESP) REFERENCES TESPECIALIDAD(CODE),
+    FOREIGN KEY (CODM) REFERENCES TMEDICO(CODM)
+);
+
+
+CREATE TABLE TENFERMEDADENELDIAGNOSTICO (
+    CODE VARCHAR2(5),
+    CODDIAG VARCHAR2(5),
+    PRIMARY KEY (CODE, CODDIAG),
+    FOREIGN KEY (CODE) REFERENCES TENFERMEDAD(CODE),
+    FOREIGN KEY (CODDIAG) REFERENCES TDIAGNOSTICO(CODDIAG)
+);
+
+-- =========================================
+-- INSERTS
+-- =========================================
+
+-- Médicos
+INSERT INTO TMEDICO VALUES ('M1', 'DNI', '33333333', 'Zela', 'Ramírez', 'Javier', '999999999');
+INSERT INTO TMEDICO VALUES ('M2', 'DNI', '44444444', 'Pérez', 'García', 'Ana', '988888888');
+
+-- Pacientes
+INSERT INTO TPACIENTE VALUES ('P01', 'Quispe', 'Soto', 'Juan');
+INSERT INTO TPACIENTE VALUES ('P02', 'López', 'Ruiz', 'María');
+
+-- Especialidades
+INSERT INTO TESPECIALIDAD VALUES ('Esp1', 'Cardiología');
+INSERT INTO TESPECIALIDAD VALUES ('Esp2', 'Pediatría');
+INSERT INTO TESPECIALIDAD VALUES ('Esp3', 'Neurología');
+
+-- Enfermedades
+INSERT INTO TENFERMEDAD VALUES ('E1', 'Gripe', 'Infección viral común');
+INSERT INTO TENFERMEDAD VALUES ('E2', 'Artritis', 'Enfermedad crónica');
+
+-- Especialidades del médico
+INSERT INTO TESPECIALIDADDELMEDICO VALUES ('EM1', 'Esp1', 'M1', TO_DATE('12-12-2010','DD-MM-YYYY'));
+INSERT INTO TESPECIALIDADDELMEDICO VALUES ('EM2', 'Esp2', 'M2', TO_DATE('02-02-2009','DD-MM-YYYY'));
+
+-- Especialidades
+INSERT INTO TESPECIALIDADDELMEDICO VALUES ('EM3', 'Esp3', 'M1', TO_DATE('01-01-2015','DD-MM-YYYY'));
+
+-- Diagnósticos
+INSERT INTO TDIAGNOSTICO VALUES ('D1', TO_DATE('25-02-2022','DD-MM-YYYY'), 'Sinusitis aguda', 'P01', 'M1');
+
+-- Relación diagnóstico - enfermedad
+INSERT INTO TENFERMEDADENELDIAGNOSTICO VALUES ('E1', 'D1');
+
+COMMIT;
+
+-- =========================================
+-- 5.1 VISTA
+-- =========================================
+CREATE OR REPLACE VIEW vista_medicos_especialidades AS
+SELECT 
+    m.CODM AS ID,
+    m.NOMBRESM || ' ' || m.PATERM AS MEDICO,
+    e.NOMBESP AS ESPECIALIDAD
+FROM TMEDICO m
+JOIN TESPECIALIDADDELMEDICO em ON m.CODM = em.CODM
+JOIN TESPECIALIDAD e ON em.CODESP = e.CODE;
+
+SELECT * FROM vista_medicos_especialidades;
+
+-- =========================================
+-- CONSULTAS
+-- =========================================
+
+-- 5.2 Conteo de especialidades
+SELECT MEDICO, COUNT(ESPECIALIDAD) AS TOTAL_ESPECIALIDADES
+FROM vista_medicos_especialidades
+GROUP BY MEDICO;
+
+-- 5.3 Médicos con 2 o más especialidades
+SELECT MEDICO, COUNT(ESPECIALIDAD) AS TOTAL
+FROM vista_medicos_especialidades
+GROUP BY MEDICO
+HAVING COUNT(ESPECIALIDAD) >= 2;
+
+--5.4 Vista de diagnosticos
+CREATE OR REPLACE VIEW vista_diagnosticos AS
+SELECT 
+    d.CODDIAG,
+    d.FECHADIAG,
+    d.DESCDIAG,
+    p.NOMBRESP || ' ' || p.PATERP AS PACIENTE,
+    m.NOMBRESM || ' ' || m.PATERM AS MEDICO
+FROM TDIAGNOSTICO d
+JOIN TPACIENTE p ON d.CODP = p.CODP
+JOIN TMEDICO m ON d.CODM = m.CODM;
+SELECT * FROM vista_diagnosticos;
+
+--5.5 Crear vista de especialidades
+SELECT * FROM vista_diagnosticos;
+
+--5.6 vISTA ENFERMEDADES
+CREATE OR REPLACE VIEW vista_diag_enfermedad AS
+SELECT 
+    d.CODDIAG,
+    d.DESCDIAG,
+    e.NOMBE AS ENFERMEDAD
+FROM TDIAGNOSTICO d
+JOIN TENFERMEDADENELDIAGNOSTICO ed ON d.CODDIAG = ed.CODDIAG
+JOIN TENFERMEDAD e ON ed.CODE = e.CODE;
+
+SELECT * FROM vista_diag_enfermedad;
+
+--5.7 CONTEO
+SELECT CODDIAG, COUNT(ENFERMEDAD) AS TOTAL
+FROM vista_diag_enfermedad
+GROUP BY CODDIAG;
+
+SELECT CODDIAG, COUNT(ENFERMEDAD) AS TOTAL
+FROM vista_diag_enfermedad
+GROUP BY CODDIAG
+HAVING COUNT(ENFERMEDAD) >= 1;
