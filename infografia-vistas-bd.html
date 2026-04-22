@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía: Vistas en Modelado de BD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .accent-gradient {
+            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 text-slate-200">
+
+    <div class="max-w-5xl mx-auto">
+        <!-- Header Section -->
+        <header class="text-center mb-12">
+            <h1 class="text-5xl md:text-7xl font-800 mb-4 tracking-tighter">
+                VISTAS <span class="text-gradient">DATABASE</span>
+            </h1>
+            <p class="text-slate-400 text-lg uppercase tracking-widest font-bold">Guía de Laboratorio N°11 • Modelado de BD</p>
+            <div class="h-1 w-32 accent-gradient mx-auto mt-6 rounded-full"></div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <!-- Concepto -->
+            <div class="glass-card p-6 rounded-3xl col-span-1 md:col-span-2">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="p-3 bg-blue-500/20 rounded-2xl text-blue-400">
+                        <i class="fas fa-eye text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold">¿Qué es una Vista?</h2>
+                </div>
+                <p class="text-slate-300 leading-relaxed text-lg">
+                    Son como <span class="text-blue-400 font-bold">"fotos"</span> de la información en un instante determinado. Funcionan como tablas virtuales basadas en el resultado de una consulta SQL, permitiendo acceder a datos complejos de forma rápida y segura sin manipular las tablas originales.
+                </p>
+            </div>
+
+            <!-- Sintaxis Chad -->
+            <div class="glass-card p-6 rounded-3xl border-l-4 border-blue-500">
+                <h3 class="text-xl font-bold mb-4 text-blue-400">Sintaxis Básica</h3>
+                <pre class="bg-black/40 p-4 rounded-xl font-mono text-sm text-pink-400">
+CREATE VIEW vista_nombre AS
+SELECT columnas
+FROM tablas
+WHERE condiciones;</pre>
+            </div>
+        </div>
+
+        <!-- Workflow / Proceso -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
+            <div class="bg-blue-600/10 border border-blue-500/30 p-4 rounded-2xl text-center">
+                <span class="block text-3xl font-black mb-1 text-blue-400">01</span>
+                <span class="font-bold text-sm">REQUERIMIENTO</span>
+                <p class="text-xs text-slate-400 mt-2">Analizar qué datos necesita el usuario final.</p>
+            </div>
+            <div class="bg-purple-600/10 border border-purple-500/30 p-4 rounded-2xl text-center">
+                <span class="block text-3xl font-black mb-1 text-purple-400">02</span>
+                <span class="font-bold text-sm">QUERY SQL</span>
+                <p class="text-xs text-slate-400 mt-2">Crear el SELECT uniendo (JOIN) las tablas necesarias.</p>
+            </div>
+            <div class="bg-indigo-600/10 border border-indigo-500/30 p-4 rounded-2xl text-center">
+                <span class="block text-3xl font-black mb-1 text-indigo-400">03</span>
+                <span class="font-bold text-sm">CREATE VIEW</span>
+                <p class="text-xs text-slate-400 mt-2">Encapsular la consulta en un objeto de vista.</p>
+            </div>
+            <div class="bg-pink-600/10 border border-pink-500/30 p-4 rounded-2xl text-center">
+                <span class="block text-3xl font-black mb-1 text-pink-400">04</span>
+                <span class="font-bold text-sm">ABSTRACCIÓN</span>
+                <p class="text-xs text-slate-400 mt-2">El usuario consulta la vista como si fuera una tabla.</p>
+            </div>
+        </div>
+
+        <!-- Casos de Estudio (Basado en el PDF) -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-800 mb-6 flex items-center gap-3">
+                <i class="fas fa-hospital text-blue-500"></i> CASO: CLÍNICA TODOSALUD
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="glass-card p-8 rounded-3xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10">
+                        <i class="fas fa-notes-medical text-8xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-blue-300 italic">V_PACIENTEENFERMEDAD</h3>
+                    <p class="text-slate-400 text-sm mb-4">Unión de Tablas: Paciente + Diagnóstico + Enfermedad</p>
+                    <div class="bg-black/50 p-4 rounded-lg font-mono text-xs text-green-400 leading-relaxed">
+                        CREATE VIEW v_pacienteenfermedad AS<br>
+                        SELECT p.nombresP, e.nombreE, d.fechaD<br>
+                        FROM paciente p<br>
+                        JOIN diagnostico d ON p.idPac = d.idPac<br>
+                        JOIN enfermedad e ON d.idEnf = e.idEnf;
+                    </div>
+                    <p class="mt-4 text-sm text-slate-300">Permite ver el historial médico sin lidiar con IDs complejos.</p>
+                </div>
+
+                <div class="glass-card p-8 rounded-3xl border-t-4 border-indigo-500">
+                    <h3 class="text-xl font-bold mb-4 text-indigo-300">Beneficios "Chad"</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-shield-alt mt-1 text-indigo-500"></i>
+                            <div>
+                                <span class="font-bold block">Seguridad</span>
+                                <span class="text-sm text-slate-400">Oculta columnas sensibles de las tablas base.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-bolt mt-1 text-yellow-500"></i>
+                            <div>
+                                <span class="font-bold block">Simplicidad</span>
+                                <span class="text-sm text-slate-400">Consultas de 100 líneas se resumen en un "SELECT * FROM vista".</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-sync mt-1 text-green-500"></i>
+                            <div>
+                                <span class="font-bold block">Consistencia</span>
+                                <span class="text-sm text-slate-400">Si la lógica cambia, solo editas la vista, no la app.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer / Call to Action -->
+        <footer class="text-center p-12 glass-card rounded-[3rem]">
+            <p class="text-2xl font-bold mb-4">¿Listo para modelar como un experto?</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <span class="px-6 py-2 bg-blue-600 rounded-full text-sm font-bold uppercase tracking-widest">Oracle Live SQL</span>
+                <span class="px-6 py-2 bg-indigo-600 rounded-full text-sm font-bold uppercase tracking-widest">SQL Server</span>
+            </div>
+            <p class="mt-8 text-slate-500 text-xs uppercase font-bold tracking-widest">Universidad Andina del Cusco • Ing. de Sistemas</p>
+        </footer>
+    </div>
+
+</body>
+</html>
